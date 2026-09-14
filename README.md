@@ -1,270 +1,160 @@
-# Week 1: IoT Architecture and Security Fundamentals
+# Secure MQTT Pipeline: IoT Cybersecurity Project
 
 ## Overview
 
-During Week 1 of my **Hydroficient Cybersecurity Externship through Extern**, I focused on understanding IoT architecture, MQTT communication, data flows, and the security risks associated with connected physical systems.
+This repository documents my **8-project IoT Cybersecurity Externship with Hydroficient through Extern**.
 
-The project used a simulated environment involving **The Grand Marina Hotel**, where HYDROLOGIC IoT devices monitor and control critical water infrastructure.
+The project follows the security lifecycle of an IoT water-management system, beginning with architecture and threat modeling and progressing into Python security automation, MQTT testing, encryption, device identity, replay-attack prevention, real-time monitoring, and anomaly detection.
 
----
+Rather than treating each security concept independently, the projects build on one another to demonstrate how an insecure IoT communication pipeline can be **analyzed, attacked in a controlled environment, hardened, and monitored**.
 
-## Project Environment
-
-The simulated Grand Marina environment included:
-
-- 500 guest rooms across 15 floors
-- 12 restaurants
-- Pool and spa facilities
-- Commercial kitchen and laundry
-- Approximately 2,000 guests
-- Three HYDROLOGIC IoT devices
-
-| Device | Location | Systems Served |
-| --- | --- | --- |
-| Device 01 | Main Building | Guest rooms, lobbies, restaurants |
-| Device 02 | Pool/Spa Wing | Pool, spa, fitness center |
-| Device 03 | Kitchen/Laundry Wing | Kitchen and laundry facilities |
-
-The devices monitor information such as:
-
-- Upstream and downstream water pressure
-- Flow rate
-- Gate positions
-- Water consumption
-- System performance
-
-Operators can also remotely control parts of the system, including gate positions and emergency water shutoff.
+> **Note:** The Grand Marina environment used throughout this repository is a simulated project scenario. All security testing documented here was performed as part of the externship learning environment.
 
 ---
 
-## IoT Architecture
+## Project Scenario
 
-I learned to analyze an IoT environment by identifying four major components:
+The simulated environment represents an IoT water-management deployment at **The Grand Marina Hotel**.
 
-| Component | Function |
+HYDROLOGIC IoT devices collect operational telemetry such as water pressure, flow rate, and gate position and communicate with cloud services using **MQTT**.
+
+Because the system can also receive commands that affect physical equipment, a cybersecurity compromise could have consequences beyond data loss.
+
+### Simplified Architecture
+
+```text
+Sensors / IoT Devices
+        │
+        │ Telemetry
+        ▼
+   MQTT Broker
+        │
+        ▼
+ Cloud / Dashboard
+        │
+        │ Commands
+        ▼
+   MQTT Broker
+        │
+        ▼
+   IoT Devices
+        │
+        ▼
+ Physical System
+```
+
+---
+
+## Project Roadmap
+
+| Project | Focus |
 | --- | --- |
-| Sensor | Collects information from the physical environment |
-| Network/Broker | Transfers and routes messages |
-| Subscriber | Receives and processes information |
-| Actuator | Performs a physical action |
-
-### Sensor Data Flow
-
-```text
-Pressure Sensor
-      ↓
-HYDROLOGIC Device
-      ↓
-Network
-      ↓
-MQTT Broker
-      ↓
-Cloud / Dashboard
-      ↓
-Operator
-```
-
-### Command Flow
-
-```text
-Operator
-    ↓
-Dashboard
-    ↓
-MQTT Broker
-    ↓
-HYDROLOGIC Device
-    ↓
-Gate / Valve
-    ↓
-Physical Water System
-```
-
-This demonstrated that IoT communication is **bidirectional**. Sensor information travels toward the monitoring system, while commands travel back to physical devices.
+| [Project 1](week-01/README.md) | Understanding IoT Systems & Threat Modeling |
+| [Project 2](week-02/README.md) | Learning Python for IoT Security |
+| [Project 3](week-03/README.md) | Building an Insecure MQTT Pipeline |
+| [Project 4](week-04/README.md) | Securing the Pipeline & Measuring the Cost |
+| [Project 5](week-05/README.md) | Enforcing Device Identity & Provisioning |
+| [Project 6](week-06/README.md) | Defeating Replay Attacks |
+| [Project 7](week-07/README.md) | Building a Real-Time Security Dashboard |
+| [Project 8](week-08/README.md) | Adding AI-Powered Anomaly Detection |
 
 ---
 
-## MQTT Fundamentals
+## Security Journey
 
-I learned how **MQTT (Message Queuing Telemetry Transport)** is used for communication between IoT devices and cloud systems.
-
-MQTT uses a **publish/subscribe model**:
+The repository follows a progression from understanding the system to implementing defensive controls:
 
 ```text
-Publisher
-    ↓
-MQTT Broker
-    ↓
-Subscriber
+IoT Architecture
+       ↓
+Threat Modeling
+       ↓
+Python Security Automation
+       ↓
+Insecure MQTT Pipeline
+       ↓
+Attack & Risk Analysis
+       ↓
+TLS / Pipeline Hardening
+       ↓
+Device Identity
+       ↓
+Replay Protection
+       ↓
+Real-Time Monitoring
+       ↓
+Anomaly Detection
 ```
-
-Devices publish messages to specific topics, while applications subscribe to the topics containing the information they need.
-
-### Example MQTT Topics
-
-```text
-hydroficient/grandmarina/device-01/pressure/upstream
-
-hydroficient/grandmarina/device-01/pressure/downstream
-
-hydroficient/grandmarina/device-01/flow/rate
-
-hydroficient/grandmarina/commands/device-01/gate/set
-
-hydroficient/grandmarina/commands/device-01/shutoff
-```
-
-I also learned how MQTT wildcards work:
-
-| Wildcard | Purpose |
-| --- | --- |
-| `#` | Matches everything below a topic level |
-| `+` | Matches any single topic level |
-
-For example:
-
-```text
-hydroficient/grandmarina/#
-```
-
-could subscribe to all messages associated with the Grand Marina environment.
 
 ---
 
-## Security Analysis
+## Key Areas Covered
 
-After understanding the architecture, I examined the system from an attacker's perspective.
+Throughout the externship, I worked with concepts including:
 
-The main attack surfaces included:
-
-```text
-IoT Device
-    ↓
-Network
-    ↓
-MQTT Broker
-    ↓
-Cloud Infrastructure
-    ↓
-Dashboard
-    ↓
-Physical Controls
-```
-
-I identified several potential attack scenarios.
-
-### Eavesdropping
-
-An attacker with network access could potentially monitor MQTT traffic and learn:
-
-- Device identifiers
-- MQTT topic structures
-- Sensor readings
-- Operational patterns
-- Command topics
-
-### Device Spoofing
-
-An attacker could attempt to impersonate a legitimate IoT device and publish false sensor readings.
-
-### Replay Attack
-
-A legitimate MQTT message could potentially be captured and retransmitted later.
-
-This highlighted the importance of timestamps and message validation.
-
-### Command Injection
-
-Unauthorized access to MQTT command topics could allow an attacker to send malicious instructions to IoT devices.
-
-Potential consequences include:
-
-- Changing gate positions
-- Triggering emergency shutoffs
-- Manipulating water flow
-- Disrupting hotel operations
-
-### Denial of Service
-
-An attacker could flood the MQTT broker with messages and interfere with legitimate sensor readings or commands.
+- IoT architecture and security
+- MQTT publish/subscribe communication
+- Threat modeling
+- Python for security automation
+- MQTT security testing
+- Network traffic analysis
+- TLS encryption
+- Device authentication and identity
+- Secure device provisioning
+- Replay attack prevention
+- Security logging and monitoring
+- Real-time security dashboards
+- Anomaly detection
 
 ---
 
-## Network Segmentation Risk
+## Technologies & Concepts
 
-One scenario involved an attacker accessing the hotel's guest Wi-Fi.
-
-The intended architecture should isolate the guest network from the IoT environment:
-
-```text
-Guest Wi-Fi
-     X
-     X  BLOCKED
-     X
-IoT Network
-```
-
-A network misconfiguration could potentially create an unintended path:
-
-```text
-Guest Wi-Fi
-     ↓
-Misconfigured Network
-     ↓
-IoT Network
-     ↓
-MQTT Broker
-```
-
-This demonstrated why **network segmentation** is important when protecting IoT infrastructure.
+`Python` `MQTT` `IoT Security` `TLS` `Threat Modeling` `Network Security` `Device Identity` `Authentication` `Replay Protection` `Security Monitoring` `Anomaly Detection`
 
 ---
 
-## Security Controls Identified
+## Repository Structure
 
-Based on the attack surface analysis, I identified several important security controls:
+```text
+secure-mqtt-pipeline/
+│
+├── README.md
+│
+├── week-01/
+│   └── README.md
+├── week-02/
+│   └── README.md
+├── week-03/
+│   └── README.md
+├── week-04/
+│   └── README.md
+├── week-05/
+│   └── README.md
+├── week-06/
+│   └── README.md
+├── week-07/
+│   └── README.md
+└── week-08/
+    └── README.md
+```
 
-- TLS encryption for MQTT communication
-- Strong device authentication
-- User authentication
-- MQTT topic-level authorization
-- Network segmentation
-- Restricted access to command topics
-- Logging and monitoring
-- Device identity validation
-- Protection of administrative dashboards
-- Monitoring for abnormal message rates
-
-Command topics require especially strong protection because they can directly affect physical systems.
-
----
-
-## Skills Developed
-
-During Week 1, I developed experience with:
-
-- IoT architecture
-- MQTT
-- Publish/subscribe communication
-- MQTT topics and wildcards
-- Sensors and actuators
-- IoT data-flow analysis
-- Attack surface identification
-- Network segmentation
-- IoT threat analysis
-- Cyber-physical security
-- Security control identification
+Each project folder documents the objectives, technical work, security concepts, findings, and lessons learned during that stage of the externship.
 
 ---
 
 ## Key Takeaway
 
-The most important lesson from Week 1 was that **IoT security extends beyond protecting information**.
+This externship demonstrated that securing IoT systems requires more than protecting network traffic.
 
-A compromised traditional system may result in stolen or manipulated data. A compromised IoT system can potentially cause changes in the **physical world**.
+A secure IoT environment requires multiple layers of defense:
 
-Understanding the architecture, communication paths, devices, protocols, and control mechanisms is therefore the first step toward properly securing an IoT environment.
+**secure communication, trusted device identity, message integrity, replay protection, monitoring, and detection.**
+
+The project gave me practical experience following an IoT system from initial architecture and threat analysis through the implementation of defensive security controls and continuous monitoring.
 
 ---
 
-> **Project Note:** This repository documents my cybersecurity work and learning completed during the Hydroficient Cybersecurity Externship through Extern. The Grand Marina environment is a simulated project scenario used as part of the externship.
+## Disclaimer
+
+This repository is intended for **educational and portfolio purposes**. The Grand Marina environment is a simulated scenario provided as part of the Hydroficient Cybersecurity Externship through Extern. Any attack techniques demonstrated during the project were performed only within authorized training environments.
