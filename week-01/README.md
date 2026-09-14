@@ -2,7 +2,7 @@
 
 ## Overview
 
-Week 1 focused on understanding the architecture of an IoT water-management system and then analyzing its security risks.
+Week 1 focused on understanding the architecture of an IoT water-management system and analyzing its security risks.
 
 The simulated environment was **The Grand Marina Hotel**, where three HYDROLOGIC IoT devices monitor and control water infrastructure across guest rooms, restaurants, pool/spa facilities, and kitchen/laundry operations.
 
@@ -30,7 +30,7 @@ The HYDROLOGIC environment contains:
 - Management dashboard
 - Physical controls such as gates and emergency shutoff
 
-A simplified telemetry flow looks like:
+### Telemetry Flow
 
 ```text
 Pressure / Flow Sensor
@@ -68,7 +68,7 @@ This introduced an important IoT security concept: **a cyberattack can create a 
 
 The system uses **MQTT**, a lightweight publish/subscribe messaging protocol commonly used by IoT devices.
 
-Instead of devices communicating directly with every application:
+The basic communication model is:
 
 ```text
 Publisher → MQTT Broker → Subscriber
@@ -80,17 +80,15 @@ Example topics:
 
 ```text
 hydroficient/grandmarina/device-01/pressure/upstream
-
 hydroficient/grandmarina/device-01/flow/rate
-
 hydroficient/grandmarina/commands/device-01/shutoff
 ```
 
 I also learned how MQTT wildcards can provide access to multiple topics:
 
 ```text
-#  → Everything below a topic level
-+  → Any single topic level
+# → Everything below a topic level
++ → Any single topic level
 ```
 
 For example:
@@ -155,21 +153,21 @@ I rated each asset from **1 (low importance) to 5 (critical)** for Confidentiali
 | Consumption/Savings Data | 3 | 4 | 2 | Integrity |
 | Leak Detection Alerts | 3 | 4 | 5 | Availability |
 
-### Interesting Finding
+### Key Finding
 
 The analysis showed that **Confidentiality is not always the highest priority in cybersecurity**.
 
-For pressure readings, I rated Integrity as `5` because inaccurate sensor data could cause incorrect decisions or physical damage.
+For pressure and flow readings, I rated **Integrity as 5** because inaccurate sensor data could lead to incorrect decisions or physical damage.
 
-For emergency shutoff and leak alerts, Availability received a `5` because those capabilities need to remain accessible during an emergency.
+For emergency shutoff and leak detection alerts, **Availability received a 5** because these capabilities need to remain accessible during an emergency.
 
-Dashboard credentials were different. I rated Confidentiality as `5` because stolen privileged credentials could provide an attacker access to the system.
+Dashboard credentials were different. I rated **Confidentiality as 5** because stolen privileged credentials could provide an attacker with access to the system.
 
 ---
 
 ## Attack Mapping
 
-I then mapped six attack techniques to realistic scenarios within the Grand Marina environment.
+I mapped six attack techniques to scenarios within the Grand Marina environment.
 
 | Attack | Scenario | CIA Impact |
 |---|---|---|
@@ -178,13 +176,13 @@ I then mapped six attack techniques to realistic scenarios within the Grand Mari
 | Replay Attack | Capture and reuse a legitimate control command | Integrity |
 | Man-in-the-Middle | Intercept and modify messages sent to the dashboard | Confidentiality & Integrity |
 | Denial of Service | Flood the MQTT broker with traffic | Availability |
-| Unauthorized Access | Steal privileged credentials and gain system control | C, I & A |
+| Unauthorized Access | Steal privileged credentials and gain system control | Confidentiality, Integrity & Availability |
 
 ---
 
 ## Threat Prioritization
 
-I ranked the attacks based on their potential impact on the environment:
+I ranked the six attacks based on their potential impact on the environment:
 
 1. **Unauthorized Access**
 2. **Man-in-the-Middle**
@@ -195,7 +193,7 @@ I ranked the attacks based on their potential impact on the environment:
 
 ### Highest Risk: Unauthorized Access
 
-I ranked **Unauthorized Access** first because compromising a privileged account could potentially affect all three parts of the CIA Triad.
+I ranked **Unauthorized Access** as the highest risk because compromising a privileged account could potentially affect all three parts of the CIA Triad.
 
 ```text
 Compromised Credentials
@@ -215,7 +213,7 @@ This made credential compromise potentially more damaging than an attack that on
 
 ## Step 2 Deliverable
 
-📄 **[View My Complete Asset CIA Analysis](Asset-CIA-Analysis.pdf)**
+📄 [View My Complete Asset CIA Analysis](./Asset-CIA-Analysis.pdf)
 
 The full assessment includes:
 
