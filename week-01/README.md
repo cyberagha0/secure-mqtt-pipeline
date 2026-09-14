@@ -359,7 +359,7 @@ The most important lesson was that **security should break an attack path at mul
 
 ## Step 3 Deliverable
 
-📄 [View My Complete Grand Marina Threat Model](./Grand-Marina-Threat-Model.pdf)
+📄 [View My Complete Grand Marina Threat Model](./Threat-Model.pdf)
 
 The threat model documents my complete Week 1 security assessment, including STRIDE analysis, risk ratings, and mitigation recommendations.
 
