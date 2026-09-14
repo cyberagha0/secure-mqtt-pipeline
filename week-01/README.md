@@ -225,12 +225,182 @@ The full assessment includes:
 
 ---
 
-# Step 3: Threat Modeling
+# Step 3: STRIDE Threat Modeling
 
-> **Coming next:** Building the final threat model using the architecture and risk analysis from Steps 1 and 2.
+The final step of Week 1 moved from identifying individual risks to building a structured threat model for the Grand Marina IoT environment.
+
+Before using a formal framework, I first practiced thinking from an attacker's perspective by asking:
+
+- What is valuable?
+- What is exposed?
+- What is weak?
+- What path could an attacker use?
+
+## Attacker Mindset Exercise
+
+For my attack scenario, I selected **data theft** as the primary objective.
+
+I considered the hotel's guest-accessible wired and wireless networks as possible initial entry points because an attacker could potentially stay at the hotel, observe the environment, identify exposed systems, and search for weaknesses.
+
+The hypothetical attack path was:
+
+```text
+Gain legitimate guest access
+        ↓
+Evaluate exposed wired / wireless networks
+        ↓
+Identify a vulnerable entry point
+        ↓
+Attempt to move toward IoT infrastructure
+        ↓
+Access valuable operational data
+```
+
+This exercise helped me understand that attackers often look for the **easiest path to a valuable asset**, rather than attacking the most obvious security control directly.
 
 ---
 
-## Week 1 Skills
+## STRIDE Framework
 
-`IoT Security` `MQTT` `CIA Triad` `Threat Analysis` `Risk Prioritization` `Attack Surface Analysis` `Network Security` `Cyber-Physical Security`
+I then used the **STRIDE** framework to analyze threats systematically.
+
+| STRIDE | Threat | Security Concern |
+|---|---|---|
+| S | Spoofing | Authentication |
+| T | Tampering | Integrity |
+| R | Repudiation | Accountability / Non-repudiation |
+| I | Information Disclosure | Confidentiality |
+| D | Denial of Service | Availability |
+| E | Elevation of Privilege | Authorization |
+
+STRIDE provided a repeatable checklist for evaluating each component of the IoT environment.
+
+---
+
+## Applying STRIDE to the Grand Marina
+
+The main components analyzed were:
+
+- HYDROLOGIC devices
+- MQTT broker
+- Cloud server
+- Management dashboard
+- Operators
+
+Examples of threats included:
+
+| Threat | Example |
+|---|---|
+| Spoofing | Fake device sends readings while pretending to be a legitimate HYDROLOGIC unit |
+| Tampering | MQTT sensor readings or control commands are modified |
+| Repudiation | An operator denies performing a critical action |
+| Information Disclosure | Unauthorized access exposes telemetry or operational data |
+| Denial of Service | Broker or dashboard becomes unavailable |
+| Elevation of Privilege | A lower-privileged account gains administrative capabilities |
+
+One of the most concerning scenarios was **tampering with sensor data**. If a pressure or flow reading is changed before reaching the dashboard, operators could believe the system is functioning normally while a real physical problem continues.
+
+---
+
+## Threat Model Process
+
+I combined the work from all three steps into a formal threat model.
+
+The process included:
+
+```text
+Understand System Architecture
+        ↓
+Identify Assets
+        ↓
+Map Data Flows
+        ↓
+Apply CIA Triad
+        ↓
+Think Like an Attacker
+        ↓
+Apply STRIDE
+        ↓
+Rate Likelihood & Impact
+        ↓
+Prioritize Risk
+        ↓
+Recommend Mitigations
+```
+
+The final threat model included:
+
+- System description
+- Data-flow analysis
+- Asset inventory
+- STRIDE threat analysis
+- Likelihood and impact ratings
+- Risk prioritization
+- Recommended security controls
+
+---
+
+## Key Security Recommendations
+
+The assessment identified several controls that could reduce risk:
+
+- Multi-factor authentication
+- TLS-encrypted communications
+- Device certificates
+- Strong access controls
+- Network segmentation
+- Audit logging
+- Rate limiting
+- Security monitoring and alerting
+
+The most important lesson was that **security should break an attack path at multiple points rather than depend on a single control**.
+
+---
+
+## Step 3 Deliverable
+
+📄 [View My Complete Grand Marina Threat Model](./Grand-Marina-Threat-Model.pdf)
+
+The threat model documents my complete Week 1 security assessment, including STRIDE analysis, risk ratings, and mitigation recommendations.
+
+---
+
+# Week 1 Summary
+
+Week 1 progressed from understanding the system to performing a structured security assessment:
+
+```text
+Step 1
+IoT Architecture & MQTT
+        ↓
+Step 2
+CIA Analysis & Attack Mapping
+        ↓
+Step 3
+STRIDE & Threat Modeling
+```
+
+By the end of Week 1, I had practiced:
+
+- IoT architecture analysis
+- MQTT fundamentals
+- CIA Triad analysis
+- Attack-surface identification
+- Threat prioritization
+- Attacker-mindset analysis
+- STRIDE threat modeling
+- Risk assessment
+- Security mitigation planning
+
+---
+
+## Week 1 Deliverables
+
+- 📄 [Asset CIA Analysis](./Asset-CIA-Analysis.pdf)
+- 📄 [Grand Marina Threat Model](./Threat-Model.pdf)
+
+---
+
+## Skills
+
+`IoT Security` `MQTT` `CIA Triad` `STRIDE` `Threat Modeling` `Risk Assessment` `Attack Surface Analysis` `Network Security` `Defense in Depth`
