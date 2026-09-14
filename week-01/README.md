@@ -215,7 +215,7 @@ This made credential compromise potentially more damaging than an attack that on
 
 ## Step 2 Deliverable
 
-📄 **[View My Complete Asset CIA Analysis](./Tural Aghabalayev - Asset CIA Analysis .pdf)**
+📄 **[View My Complete Asset CIA Analysis](Asset-CIA-Analysis.pdf)**
 
 The full assessment includes:
 
