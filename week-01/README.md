@@ -1,70 +1,50 @@
-# Week 1: IoT Architecture and Security Fundamentals
+# Week 1: Understanding IoT Systems & Threat Modeling
 
 ## Overview
 
-During Week 1 of my **Hydroficient Cybersecurity Externship through Extern**, I focused on understanding IoT architecture, MQTT communication, data flows, and the security risks associated with connected physical systems.
+Week 1 focused on understanding the architecture of an IoT water-management system and then analyzing its security risks.
 
-The project used a simulated environment involving **The Grand Marina Hotel**, where HYDROLOGIC IoT devices monitor and control critical water infrastructure.
+The simulated environment was **The Grand Marina Hotel**, where three HYDROLOGIC IoT devices monitor and control water infrastructure across guest rooms, restaurants, pool/spa facilities, and kitchen/laundry operations.
 
----
+The week is divided into three steps:
 
-## Project Environment
-
-The simulated Grand Marina environment included:
-
-- 500 guest rooms across 15 floors
-- 12 restaurants
-- Pool and spa facilities
-- Commercial kitchen and laundry
-- Approximately 2,000 guests
-- Three HYDROLOGIC IoT devices
-
-| Device | Location | Systems Served |
-| --- | --- | --- |
-| Device 01 | Main Building | Guest rooms, lobbies, restaurants |
-| Device 02 | Pool/Spa Wing | Pool, spa, fitness center |
-| Device 03 | Kitchen/Laundry Wing | Kitchen and laundry facilities |
-
-The devices monitor information such as:
-
-- Upstream and downstream water pressure
-- Flow rate
-- Gate positions
-- Water consumption
-- System performance
-
-Operators can also remotely control parts of the system, including gate positions and emergency water shutoff.
+1. **Understanding the IoT System & MQTT Architecture**
+2. **CIA Analysis & Attack Mapping**
+3. **Threat Modeling**
 
 ---
+
+# Step 1: Understanding the IoT System & MQTT Architecture
 
 ## IoT Architecture
 
-I learned to analyze an IoT environment by identifying four major components:
+The first step was understanding how the system operates before trying to secure it.
 
-| Component | Function |
-| --- | --- |
-| Sensor | Collects information from the physical environment |
-| Network/Broker | Transfers and routes messages |
-| Subscriber | Receives and processes information |
-| Actuator | Performs a physical action |
+The HYDROLOGIC environment contains:
 
-### Sensor Data Flow
+- Pressure and flow sensors
+- IoT devices
+- MQTT communication
+- MQTT broker
+- Cloud infrastructure
+- Management dashboard
+- Physical controls such as gates and emergency shutoff
+
+A simplified telemetry flow looks like:
 
 ```text
-Pressure Sensor
-      ↓
+Pressure / Flow Sensor
+        ↓
 HYDROLOGIC Device
-      ↓
-Network
-      ↓
+        ↓
 MQTT Broker
-      ↓
+        ↓
 Cloud / Dashboard
-      ↓
+        ↓
 Operator
 ```
 
-### Command Flow
+Commands travel in the opposite direction:
 
 ```text
 Operator
@@ -80,46 +60,38 @@ Gate / Valve
 Physical Water System
 ```
 
-This demonstrated that IoT communication is **bidirectional**. Sensor information travels toward the monitoring system, while commands travel back to physical devices.
+This introduced an important IoT security concept: **a cyberattack can create a physical impact**.
 
 ---
 
-## MQTT Fundamentals
+## MQTT Communication
 
-I learned how **MQTT (Message Queuing Telemetry Transport)** is used for communication between IoT devices and cloud systems.
+The system uses **MQTT**, a lightweight publish/subscribe messaging protocol commonly used by IoT devices.
 
-MQTT uses a **publish/subscribe model**:
+Instead of devices communicating directly with every application:
 
 ```text
-Publisher
-    ↓
-MQTT Broker
-    ↓
-Subscriber
+Publisher → MQTT Broker → Subscriber
 ```
 
-Devices publish messages to specific topics, while applications subscribe to the topics containing the information they need.
+Devices publish telemetry to MQTT topics while dashboards and other systems subscribe to the information they need.
 
-### Example MQTT Topics
+Example topics:
 
 ```text
 hydroficient/grandmarina/device-01/pressure/upstream
 
-hydroficient/grandmarina/device-01/pressure/downstream
-
 hydroficient/grandmarina/device-01/flow/rate
-
-hydroficient/grandmarina/commands/device-01/gate/set
 
 hydroficient/grandmarina/commands/device-01/shutoff
 ```
 
-I also learned how MQTT wildcards work:
+I also learned how MQTT wildcards can provide access to multiple topics:
 
-| Wildcard | Purpose |
-| --- | --- |
-| `#` | Matches everything below a topic level |
-| `+` | Matches any single topic level |
+```text
+#  → Everything below a topic level
++  → Any single topic level
+```
 
 For example:
 
@@ -127,15 +99,13 @@ For example:
 hydroficient/grandmarina/#
 ```
 
-could subscribe to all messages associated with the Grand Marina environment.
+could subscribe to all messages beneath the Grand Marina topic hierarchy if permissions allowed it.
 
 ---
 
-## Security Analysis
+## Initial Attack Surface
 
-After understanding the architecture, I examined the system from an attacker's perspective.
-
-The main attack surfaces included:
+After mapping the communication flow, I identified several potential attack points:
 
 ```text
 IoT Device
@@ -144,127 +114,125 @@ Network
     ↓
 MQTT Broker
     ↓
-Cloud Infrastructure
+Cloud
     ↓
 Dashboard
     ↓
 Physical Controls
 ```
 
-I identified several potential attack scenarios.
+Potential attacks included:
 
-### Eavesdropping
+- Eavesdropping on MQTT traffic
+- Spoofing devices or data
+- Replaying legitimate commands
+- Injecting unauthorized commands
+- Flooding the MQTT broker
+- Compromising dashboard access
 
-An attacker with network access could potentially monitor MQTT traffic and learn:
-
-- Device identifiers
-- MQTT topic structures
-- Sensor readings
-- Operational patterns
-- Command topics
-
-### Device Spoofing
-
-An attacker could attempt to impersonate a legitimate IoT device and publish false sensor readings.
-
-### Replay Attack
-
-A legitimate MQTT message could potentially be captured and retransmitted later.
-
-This highlighted the importance of timestamps and message validation.
-
-### Command Injection
-
-Unauthorized access to MQTT command topics could allow an attacker to send malicious instructions to IoT devices.
-
-Potential consequences include:
-
-- Changing gate positions
-- Triggering emergency shutoffs
-- Manipulating water flow
-- Disrupting hotel operations
-
-### Denial of Service
-
-An attacker could flood the MQTT broker with messages and interfere with legitimate sensor readings or commands.
+This architecture analysis provided the foundation for the formal risk assessment in Step 2.
 
 ---
 
-## Network Segmentation Risk
+# Step 2: CIA Analysis & Attack Mapping
 
-One scenario involved an attacker accessing the hotel's guest Wi-Fi.
+After understanding how the IoT system communicates, I evaluated the security requirements of its critical assets using the **CIA Triad**:
 
-The intended architecture should isolate the guest network from the IoT environment:
+- **Confidentiality** — preventing unauthorized disclosure
+- **Integrity** — ensuring information and commands remain accurate
+- **Availability** — ensuring systems and controls remain accessible when needed
+
+## Asset CIA Analysis
+
+I rated each asset from **1 (low importance) to 5 (critical)** for Confidentiality, Integrity, and Availability.
+
+| Asset | C | I | A | Primary Concern |
+|---|---:|---:|---:|---|
+| Pressure/Flow Readings | 3 | 5 | 4 | Integrity |
+| Gate Control Commands | 3 | 4 | 5 | Availability |
+| Emergency Shutoff | 3 | 4 | 5 | Availability |
+| Dashboard Credentials | 5 | 4 | 3 | Confidentiality |
+| Consumption/Savings Data | 3 | 4 | 2 | Integrity |
+| Leak Detection Alerts | 3 | 4 | 5 | Availability |
+
+### Interesting Finding
+
+The analysis showed that **Confidentiality is not always the highest priority in cybersecurity**.
+
+For pressure readings, I rated Integrity as `5` because inaccurate sensor data could cause incorrect decisions or physical damage.
+
+For emergency shutoff and leak alerts, Availability received a `5` because those capabilities need to remain accessible during an emergency.
+
+Dashboard credentials were different. I rated Confidentiality as `5` because stolen privileged credentials could provide an attacker access to the system.
+
+---
+
+## Attack Mapping
+
+I then mapped six attack techniques to realistic scenarios within the Grand Marina environment.
+
+| Attack | Scenario | CIA Impact |
+|---|---|---|
+| Eavesdropping | Capture sensor traffic traveling toward the broker | Confidentiality |
+| Spoofing | Introduce or modify sensor information | Integrity |
+| Replay Attack | Capture and reuse a legitimate control command | Integrity |
+| Man-in-the-Middle | Intercept and modify messages sent to the dashboard | Confidentiality & Integrity |
+| Denial of Service | Flood the MQTT broker with traffic | Availability |
+| Unauthorized Access | Steal privileged credentials and gain system control | C, I & A |
+
+---
+
+## Threat Prioritization
+
+I ranked the attacks based on their potential impact on the environment:
+
+1. **Unauthorized Access**
+2. **Man-in-the-Middle**
+3. **Replay Attack**
+4. **Spoofing**
+5. **Denial of Service**
+6. **Eavesdropping**
+
+### Highest Risk: Unauthorized Access
+
+I ranked **Unauthorized Access** first because compromising a privileged account could potentially affect all three parts of the CIA Triad.
 
 ```text
-Guest Wi-Fi
-     X
-     X  BLOCKED
-     X
-IoT Network
+Compromised Credentials
+        ↓
+Unauthorized Dashboard Access
+        ↓
+View System Information
+        +
+Modify Controls
+        +
+Disrupt Operations
 ```
 
-A network misconfiguration could potentially create an unintended path:
-
-```text
-Guest Wi-Fi
-     ↓
-Misconfigured Network
-     ↓
-IoT Network
-     ↓
-MQTT Broker
-```
-
-This demonstrated why **network segmentation** is important when protecting IoT infrastructure.
+This made credential compromise potentially more damaging than an attack that only exposes information.
 
 ---
 
-## Security Controls Identified
+## Step 2 Deliverable
 
-Based on the attack surface analysis, I identified several important security controls:
+📄 **[View My Complete Asset CIA Analysis](./Tural-Aghabalayev-Asset-CIA-Analysis.pdf)**
 
-- TLS encryption for MQTT communication
-- Strong device authentication
-- User authentication
-- MQTT topic-level authorization
-- Network segmentation
-- Restricted access to command topics
-- Logging and monitoring
-- Device identity validation
-- Protection of administrative dashboards
-- Monitoring for abnormal message rates
+The full assessment includes:
 
-Command topics require especially strong protection because they can directly affect physical systems.
+- CIA ratings and justifications
+- Six mapped attack scenarios
+- Targeted assets
+- CIA impact analysis
+- Final threat-priority ranking
 
 ---
 
-## Skills Developed
+# Step 3: Threat Modeling
 
-During Week 1, I developed experience with:
-
-- IoT architecture
-- MQTT
-- Publish/subscribe communication
-- MQTT topics and wildcards
-- Sensors and actuators
-- IoT data-flow analysis
-- Attack surface identification
-- Network segmentation
-- IoT threat analysis
-- Cyber-physical security
-- Security control identification
+> **Coming next:** Building the final threat model using the architecture and risk analysis from Steps 1 and 2.
 
 ---
 
-## Key Takeaway
+## Week 1 Skills
 
-The most important lesson from Week 1 was that **IoT security extends beyond protecting information**.
-
-A compromised traditional system may result in stolen or manipulated data. A compromised IoT system can potentially cause changes in the **physical world**.
-
-Understanding the architecture, communication paths, devices, protocols, and control mechanisms is therefore the first step toward properly securing an IoT environment.
-
----
-
-> **Project Note:** This repository documents my cybersecurity work and learning completed during the Hydroficient Cybersecurity Externship through Extern. The Grand Marina environment is a simulated project scenario used as part of the externship.
+`IoT Security` `MQTT` `CIA Triad` `Threat Analysis` `Risk Prioritization` `Attack Surface Analysis` `Network Security` `Cyber-Physical Security`
